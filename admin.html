@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEROLA - Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <h1>MEROLA</h1>
+    <nav>
+        <a href="index.html">Store</a>
+        <a href="admin.html">Products</a>
+        <a href="orders.html">Customer Orders</a>
+    </nav>
+</header>
+
+<main class="admin-container">
+
+    <section id="login-section">
+        <h2>Admin Login</h2>
+
+        <form id="login-form">
+            <input
+                type="email"
+                id="login-email"
+                placeholder="Admin Email"
+                required
+            >
+
+            <input
+                type="password"
+                id="login-password"
+                placeholder="Password"
+                required
+            >
+
+            <button type="submit">LOGIN</button>
+        </form>
+    </section>
+
+    <section id="dashboard-section" hidden>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2>Manage Products</h2>
+            <button type="button" id="logout-button">LOG OUT</button>
+        </div>
+
+        <form id="product-form">
+
+            <input type="hidden" id="product-id">
+
+            <input
+                type="text"
+                id="product-name"
+                placeholder="Product Name"
+                required
+            >
+
+            <select id="product-category" required>
+                <option value="hair">Hair Care</option>
+                <option value="skin">Skin Care</option>
+            </select>
+
+            <textarea
+                id="product-description"
+                placeholder="Product Description"
+                required
+            ></textarea>
+
+            <input
+                type="number"
+                id="product-price"
+                placeholder="Current Price"
+                min="0"
+                step="0.01"
+            >
+
+            <input
+                type="number"
+                id="product-old-price"
+                placeholder="Original Price"
+                min="0"
+                step="0.01"
+            >
+
+            <input type="date" id="product-offer-date">
+
+            <div class="product-image-upload" style="margin:15px 0;">
+                <label for="product-image" style="display:block; margin-bottom:10px;">
+                    Product Image
+                </label>
+
+                <input
+                    type="file"
+                    id="product-image"
+                    accept="image/*"
+                >
+
+                <div id="image-preview-container" hidden style="margin-top:15px;">
+                    <img
+                        id="image-preview"
+                        src=""
+                        alt="Product preview"
+                        style="width:180px; height:180px; object-fit:cover; border-radius:10px;"
+                    >
+                </div>
+
+                <p style="font-size:13px; margin-top:8px;">
+                    Choose an image from your device. Maximum size: 5 MB.
+                </p>
+            </div>
+
+            <button type="submit" id="save-product">
+                ADD PRODUCT
+            </button>
+
+            <button type="button" id="cancel-edit" hidden>
+                CANCEL
+            </button>
+
+        </form>
+
+        <h2>Current Products</h2>
+        <div id="admin-products"></div>
+
+    </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="admin.js"></script>
+
+</body>
+</html>

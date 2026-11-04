@@ -1,0 +1,66 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEROLA | Orders Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="orders-page">
+
+    <header class="orders-header">
+        <a href="index.html" class="logo">MEROLA</a>
+
+        <nav>
+            <a href="index.html">Store</a>
+            <a href="admin.html">Products</a>
+            <a href="orders.html" class="active">Orders</a>
+        </nav>
+    </header>
+
+    <main class="orders-main">
+
+        <section class="orders-heading">
+            <div>
+                <span>MEROLA MANAGEMENT</span>
+                <h1>Customer Orders</h1>
+                <p>Manage and track your customers' orders.</p>
+            </div>
+
+            <a href="admin.html" class="orders-back-btn">
+                MANAGE PRODUCTS
+            </a>
+        </section>
+
+        <section class="orders-content">
+
+            <div class="orders-content-header">
+                <div>
+                    <span>YOUR STORE</span>
+                    <h2>All Orders</h2>
+                </div>
+
+                <span class="orders-live-label">
+                    ORDER MANAGEMENT
+                </span>
+            </div>
+
+            <div id="orders-list"></div>
+
+        </section>
+
+        <footer class="orders-footer">
+            <span>MEROLA</span>
+            <p>Beauty in every detail.</p>
+        </footer>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="orders.js"></script>
+
+</body>
+</html>

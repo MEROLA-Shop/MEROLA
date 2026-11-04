@@ -1,0 +1,94 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | MEROLA</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="checkout-page">
+
+    <header class="checkout-top">
+        <a href="index.html" class="checkout-logo">MEROLA</a>
+        <span>SECURE CHECKOUT</span>
+    </header>
+
+    <main class="checkout-main">
+
+        <section class="checkout-intro">
+            <span>YOUR BEAUTY JOURNEY</span>
+            <h1>Almost Yours.</h1>
+            <p>Complete your details and let us take care of the rest.</p>
+        </section>
+
+        <div class="checkout-layout">
+
+            <section class="checkout-form-section">
+                <div class="checkout-section-heading">
+                    <span>01</span>
+                    <div>
+                        <h2>Shipping Details</h2>
+                        <p>Where should we deliver your order?</p>
+                    </div>
+                </div>
+
+                <form id="checkout-form">
+
+                    <label for="customer-name">FULL NAME</label>
+                    <input type="text" id="customer-name"
+                        placeholder="Enter your full name" required>
+
+                    <label for="customer-phone">PHONE NUMBER</label>
+                    <input type="tel" id="customer-phone"
+                        placeholder="Enter your phone number" required>
+
+                    <label for="customer-city">CITY</label>
+                    <input type="text" id="customer-city"
+                        placeholder="Your city" required>
+
+                    <label for="customer-address">FULL ADDRESS</label>
+                    <textarea id="customer-address"
+                        placeholder="Street, building, apartment..." required></textarea>
+
+                    <label for="customer-notes">ORDER NOTES <span>(OPTIONAL)</span></label>
+                    <textarea id="customer-notes"
+                        placeholder="Anything else we should know?"></textarea>
+
+                    <button type="submit">PLACE MY ORDER <span>→</span></button>
+
+                    <p class="checkout-secure">Thank you for choosing MEROLA.</p>
+
+                </form>
+            </section>
+
+            <aside class="checkout-summary-section">
+
+                <div class="summary-top">
+                    <span>02 — YOUR SELECTION</span>
+                    <h2>Order Summary</h2>
+                </div>
+
+                <div id="checkout-items"></div>
+
+                <div class="summary-total">
+                    <span>Grand Total</span>
+                    <strong><span id="checkout-total">0</span> EGP</strong>
+                </div>
+
+                <div class="summary-footer">
+                    <span>MEROLA</span>
+                    <p>Beauty in every detail.</p>
+                </div>
+
+            </aside>
+
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="script.js"></script>
+
+</body>
+</html>
