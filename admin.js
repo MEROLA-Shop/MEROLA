@@ -1,6 +1,6 @@
 
-const ADMIN_UID = "d4502d44-fc11-4247-b4aa-070b84e6baf2";
 const STORAGE_BUCKET = "MEROLA-image";
+
 const loginSection = document.getElementById("login-section");
 const dashboardSection = document.getElementById("dashboard-section");
 const loginForm = document.getElementById("login-form");
@@ -13,6 +13,22 @@ const imagePreviewContainer = document.getElementById("image-preview-container")
 
 let products = [];
 let previewObjectUrl = null;
+
+// Check whether a user is an admin
+async function isAdmin(userId) {
+    const { data, error } = await supabaseClient
+        .from("admin_users")
+        .select("user_id")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+    if (error) {
+        console.error("Admin check error:", error);
+        return false;
+    }
+
+    return !!data;
+}
 
 // Image preview
 imageInput.addEventListener("change", function () {
@@ -63,15 +79,19 @@ async function checkLogin() {
 
     if (error) {
         alert(error.message);
+        showLogin();
         return;
     }
 
     const user = data.session?.user;
 
-    if (user && user.id === ADMIN_UID) {
+    if (user && await isAdmin(user.id)) {
         showDashboard();
     } else {
-        await supabaseClient.auth.signOut();
+        if (user) {
+            await supabaseClient.auth.signOut();
+        }
+
         showLogin();
     }
 }
@@ -104,7 +124,9 @@ loginForm.addEventListener("submit", async function (event) {
         return;
     }
 
-    if (data.user.id !== ADMIN_UID) {
+    const authorized = await isAdmin(data.user.id);
+
+    if (!authorized) {
         await supabaseClient.auth.signOut();
         alert("You are not authorized to access this dashboard.");
         return;

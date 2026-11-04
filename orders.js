@@ -1,7 +1,4 @@
-
 const ordersList = document.getElementById("orders-list");
-
-const ADMIN_UID = "d4502d44-fc11-4247-b4aa-070b84e6baf2";
 
 let orders = [];
 
@@ -13,17 +10,44 @@ const STATUS_OPTIONS = [
     "Cancelled"
 ];
 
+// Check if user is registered as an admin
+async function isAdmin(userId) {
+    const { data, error } = await supabaseClient
+        .from("admin_users")
+        .select("user_id")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+    if (error) {
+        console.error("Admin check error:", error);
+        return false;
+    }
+
+    return !!data;
+}
+
+// Check current login and admin permission
 async function checkAdmin() {
     const { data, error } = await supabaseClient.auth.getSession();
 
-    if (error || !data.session?.user || data.session.user.id !== ADMIN_UID) {
-        ordersList.innerHTML = '<p>Please login as admin first.</p><a href="admin.html">Go to Admin Login</a>';
+    if (error || !data.session?.user) {
+        ordersList.innerHTML =
+            '<p>Please login as admin first.</p><a href="admin.html">Go to Admin Login</a>';
+        return false;
+    }
+
+    const allowed = await isAdmin(data.session.user.id);
+
+    if (!allowed) {
+        ordersList.innerHTML =
+            '<p>You do not have admin permission.</p><a href="admin.html">Go to Admin Login</a>';
         return false;
     }
 
     return true;
 }
 
+// Load all orders
 async function loadOrders() {
     ordersList.textContent = "Loading orders...";
 
@@ -35,7 +59,7 @@ async function loadOrders() {
         .order("created_at", { ascending: false });
 
     if (error) {
-        console.error(error);
+        console.error("LOAD ORDERS ERROR:", error);
         ordersList.textContent = error.message;
         return;
     }
@@ -44,10 +68,13 @@ async function loadOrders() {
     displayOrders();
 }
 
+// Format phone number for WhatsApp
 function formatWhatsAppPhone(phone) {
     let number = String(phone || "").replace(/\D/g, "");
 
-    if (number.startsWith("00")) number = number.slice(2);
+    if (number.startsWith("00")) {
+        number = number.slice(2);
+    }
 
     if (number.startsWith("01") && number.length === 11) {
         number = "20" + number.slice(1);
@@ -58,6 +85,7 @@ function formatWhatsAppPhone(phone) {
     return number;
 }
 
+// Display orders
 function displayOrders() {
     if (!orders.length) {
         ordersList.innerHTML = "<p>No orders yet.</p>";
@@ -76,11 +104,16 @@ function displayOrders() {
         return `
             <div class="admin-product order-card">
                 <h3>Order #${order.id}</h3>
+
                 <p>Date: ${order.created_at ? new Date(order.created_at).toLocaleString() : ""}</p>
+
                 <p>Name: ${order.customer_name || ""}</p>
-                <p>Phone: ${order.phone || ""}
-                    ${whatsapp ? `<a href="https://wa.me/${whatsapp}" target="_blank">WhatsApp</a>` : ""}
+
+                <p>
+                    Phone: ${order.phone || ""}
+                    ${whatsapp ? `<a href="https://wa.me/${whatsapp}" target="_blank" rel="noopener noreferrer">WhatsApp</a>` : ""}
                 </p>
+
                 <p>City: ${order.city || ""}</p>
                 <p>Address: ${order.address || ""}</p>
                 <p>Notes: ${order.notes || "None"}</p>
@@ -116,12 +149,20 @@ function displayOrders() {
     }).join("");
 }
 
+// Copy shipping details
 async function copyShippingDetails(orderId) {
-    const order = orders.find(item => String(item.id) === String(orderId));
-    if (!order) return alert("Order not found.");
+    const order = orders.find(
+        item => String(item.id) === String(orderId)
+    );
+
+    if (!order) {
+        return alert("Order not found.");
+    }
 
     const products = Array.isArray(order.products)
-        ? order.products.map(item => `${item.name || "Product"} x ${item.quantity || 1}`).join("\n")
+        ? order.products.map(item =>
+            `${item.name || "Product"} x ${item.quantity || 1}`
+        ).join("\n")
         : "No product details";
 
     const text = [
@@ -144,6 +185,7 @@ async function copyShippingDetails(orderId) {
         alert("Shipping details copied!");
     } catch (error) {
         const textarea = document.createElement("textarea");
+
         textarea.value = text;
         document.body.appendChild(textarea);
         textarea.select();
@@ -155,9 +197,13 @@ async function copyShippingDetails(orderId) {
     }
 }
 
+// Save order status
 async function saveStatus(orderId) {
     const select = document.getElementById(`status-${orderId}`);
-    if (!select) return alert("Status selector not found.");
+
+    if (!select) {
+        return alert("Status selector not found.");
+    }
 
     const { data, error } = await supabaseClient
         .from("orders")
@@ -174,14 +220,22 @@ async function saveStatus(orderId) {
         return alert("No order was updated. Check permissions.");
     }
 
-    const order = orders.find(item => String(item.id) === String(orderId));
-    if (order) order.status = data[0].status;
+    const order = orders.find(
+        item => String(item.id) === String(orderId)
+    );
+
+    if (order) {
+        order.status = data[0].status;
+    }
 
     alert("Status saved successfully!");
 }
 
+// Delete order
 async function deleteOrder(orderId) {
-    if (!confirm("Are you sure you want to delete this order?")) return;
+    if (!confirm("Are you sure you want to delete this order?")) {
+        return;
+    }
 
     const { error } = await supabaseClient
         .from("orders")
@@ -194,7 +248,9 @@ async function deleteOrder(orderId) {
     }
 
     alert("Order deleted successfully!");
+
     await loadOrders();
 }
 
+// Start
 loadOrders();
