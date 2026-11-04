@@ -1,0 +1,191 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MEROLA | Product Details</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .product-details-page {
+            min-height: 100vh;
+            background: #fffaf8;
+        }
+
+        .details-breadcrumb {
+            padding: 25px 7%;
+            color: #958187;
+            font-size: 13px;
+        }
+
+        .details-breadcrumb a {
+            color: #a65d70;
+            text-decoration: none;
+        }
+
+        .details-wrapper {
+            max-width: 1200px;
+            margin: 20px auto 80px;
+            padding: 0 25px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 65px;
+            align-items: start;
+        }
+
+        .details-gallery {
+            background: #f4dfe3;
+            padding: 25px;
+        }
+
+        .details-main-image {
+            width: 100%;
+            height: 480px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .details-thumbnails {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .details-thumbnails button {
+            width: 75px;
+            height: 75px;
+            padding: 4px;
+            border: 1px solid #e5cbd1;
+            background: white;
+            cursor: pointer;
+        }
+
+        .details-thumbnails img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .details-info {
+            padding-top: 25px;
+        }
+
+        .details-brand {
+            color: #a65d70;
+            font-size: 12px;
+            letter-spacing: 4px;
+        }
+
+        .details-info h1 {
+            font-size: 35px;
+            font-weight: 500;
+            color: #49353b;
+            margin: 20px 0;
+            line-height: 1.4;
+        }
+
+        .details-price {
+            color: #a65d70;
+            font-size: 25px;
+            font-weight: bold;
+            margin: 25px 0;
+        }
+
+        .details-price del {
+            color: #999;
+            font-size: 17px;
+            margin-right: 10px;
+        }
+
+        .details-description {
+            color: #76676b;
+            line-height: 2;
+            font-size: 15px;
+            margin: 30px 0;
+            white-space: pre-line;
+        }
+
+        .details-add-button {
+            width: 100%;
+            padding: 17px;
+            border: none;
+            background: #a65d70;
+            color: white;
+            font-size: 13px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .details-add-button:hover {
+            background: #49353b;
+        }
+
+        .details-back {
+            display: inline-block;
+            margin-top: 25px;
+            color: #a65d70;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .details-loading {
+            text-align: center;
+            padding: 100px 20px;
+            color: #a65d70;
+        }
+
+        @media (max-width: 768px) {
+            .details-wrapper {
+                grid-template-columns: 1fr;
+                gap: 25px;
+                margin-top: 10px;
+            }
+
+            .details-main-image {
+                height: 350px;
+            }
+
+            .details-info h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+
+<body class="product-details-page">
+
+    <header>
+        <a href="index.html" class="logo">MEROLA</a>
+
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="hair.html">Hair Care</a>
+            <a href="skin.html">Skin Care</a>
+        </nav>
+    </header>
+
+    <div class="details-breadcrumb">
+        <a href="index.html">Home</a>
+        / Product Details
+    </div>
+
+    <main id="product-details">
+        <div class="details-loading">Loading product details...</div>
+    </main>
+
+    <footer class="orders-footer">
+        <span>MEROLA</span>
+        <p>Beauty in every detail.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="script.js"></script>
+
+</body>
+</html>

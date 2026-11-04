@@ -11,6 +11,21 @@ let cart = JSON.parse(
 
 
 // =====================================
+// HTML SAFETY
+// =====================================
+
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[char]);
+}
+
+
+// =====================================
 // SHIPPING
 // =====================================
 
@@ -99,10 +114,13 @@ async function loadProducts() {
                 : Number(product.old_price),
             offerUntil: product.offer_until,
             imageUrl: product.image_url,
-            galleryUrls: product.gallery_urls || []
+            galleryUrls: Array.isArray(product.gallery_urls)
+                ? product.gallery_urls
+                : []
         }));
 
         displayProducts();
+        displayProductDetails();
         updateCart();
         displayCheckoutSummary();
 
@@ -151,7 +169,7 @@ function getProductPrice(product) {
 
 
 // =====================================
-// DISPLAY PRODUCTS
+// DISPLAY PRODUCT CARDS
 // =====================================
 
 function displayProducts() {
@@ -173,23 +191,39 @@ function displayProducts() {
 
         const priceHTML = currentPrice !== null
             ? `<h4>${currentPrice} EGP</h4>
-               ${activeOffer ? `<del>${product.oldPrice} EGP</del>
-               <span class="discount">${discount}% OFF</span>` : ""}`
+               ${activeOffer
+                    ? `<del>${product.oldPrice} EGP</del>
+                       <span class="discount">${discount}% OFF</span>`
+                    : ""}`
             : `<h4>Contact for price</h4>`;
 
         const imageHTML = product.imageUrl
-            ? `<img src="${product.imageUrl}" alt="${product.name}" class="product-photo">`
-            : `<div class="product-image">${product.name}</div>`;
+            ? `<img src="${escapeHTML(product.imageUrl)}"
+                    alt="${escapeHTML(product.name)}"
+                    class="product-photo">`
+            : `<div class="product-image">${escapeHTML(product.name)}</div>`;
 
         const productId = JSON.stringify(String(product.id));
 
+        const detailsLink = `product.html?id=${encodeURIComponent(product.id)}`;
+
         const card = `
             <div class="product-card">
+
                 ${imageHTML}
-                <h3>${product.name}</h3>
-                <p>${product.description || ""}</p>
+
+                <h3>${escapeHTML(product.name)}</h3>
+
                 ${priceHTML}
-                <button onclick='addToCart(${productId})'>ADD TO CART</button>
+
+                <a href="${detailsLink}" class="details-btn">
+                    VIEW DETAILS
+                </a>
+
+                <button onclick='addToCart(${productId})'>
+                    ADD TO CART
+                </button>
+
             </div>
         `;
 
@@ -204,6 +238,126 @@ function displayProducts() {
         if (activeOffer && offers) {
             offers.innerHTML += card;
         }
+    });
+}
+
+
+// =====================================
+// PRODUCT DETAILS PAGE
+// =====================================
+
+function displayProductDetails() {
+    const detailsContainer = document.getElementById("product-details");
+
+    if (!detailsContainer) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get("id");
+
+    const product = products.find(
+        p => String(p.id) === String(productId)
+    );
+
+    if (!product) {
+        detailsContainer.innerHTML = `
+            <h2>Product Not Found</h2>
+            <p>This product may no longer be available.</p>
+            <a href="hair-care.html">Back to Hair Care</a>
+        `;
+        return;
+    }
+
+    const activeOffer = isOfferActive(product);
+    const currentPrice = getProductPrice(product);
+
+    const discount = activeOffer && product.oldPrice
+        ? Math.round((1 - currentPrice / product.oldPrice) * 100)
+        : 0;
+
+    const priceHTML = currentPrice !== null
+        ? `<h2>${currentPrice} EGP</h2>
+           ${activeOffer
+                ? `<del>${product.oldPrice} EGP</del>
+                   <span class="discount">${discount}% OFF</span>`
+                : ""}`
+        : `<h2>Contact for price</h2>`;
+
+    const mainImage = product.imageUrl
+        ? `<img id="main-product-image"
+                src="${escapeHTML(product.imageUrl)}"
+                alt="${escapeHTML(product.name)}">`
+        : `<div class="product-image">${escapeHTML(product.name)}</div>`;
+
+    const gallery = [
+        ...(product.imageUrl ? [product.imageUrl] : []),
+        ...product.galleryUrls
+    ].filter((url, index, array) =>
+        url && array.indexOf(url) === index
+    );
+
+    const galleryHTML = gallery.length > 1
+        ? `<div class="product-gallery">
+            ${gallery.map(url => `
+                <button type="button"
+                        class="gallery-image"
+                        data-image="${escapeHTML(url)}">
+                    <img src="${escapeHTML(url)}"
+                         alt="${escapeHTML(product.name)}">
+                </button>
+            `).join("")}
+           </div>`
+        : "";
+
+    const productIdJSON = JSON.stringify(String(product.id));
+
+    detailsContainer.innerHTML = `
+        <div class="product-details-layout">
+
+            <div class="product-details-images">
+                ${mainImage}
+                ${galleryHTML}
+            </div>
+
+            <div class="product-details-info">
+
+                <span class="product-category">
+                    MEROLA ${escapeHTML(product.category).toUpperCase()}
+                </span>
+
+                <h1>${escapeHTML(product.name)}</h1>
+
+                <div class="product-details-price">
+                    ${priceHTML}
+                </div>
+
+                <div class="product-description">
+                    ${escapeHTML(product.description || "More product details coming soon.")}
+                </div>
+
+                <button type="button"
+                        class="details-add-cart"
+                        onclick='addToCart(${productIdJSON})'>
+                    ADD TO CART
+                </button>
+
+                <a href="${product.category === "hair" ? "hair-care.html" : "skin-care.html"}"
+                   class="back-to-products">
+                    ← BACK TO COLLECTION
+                </a>
+
+            </div>
+
+        </div>
+    `;
+
+    detailsContainer.querySelectorAll(".gallery-image").forEach(button => {
+        button.addEventListener("click", function() {
+            const mainImageElement = document.getElementById("main-product-image");
+
+            if (mainImageElement) {
+                mainImageElement.src = this.dataset.image;
+            }
+        });
     });
 }
 
@@ -285,13 +439,13 @@ function updateCart() {
         if (cartItems) {
             cartItems.innerHTML += `
                 <div class="cart-item">
-                    <h3>${product.name}</h3>
+                    <h3>${escapeHTML(product.name)}</h3>
                     <p>Quantity: ${item.quantity}</p>
                     <p>${subtotal} EGP</p>
 
-                    <button onclick='changeQuantity("${item.id}", -1)'>-</button>
-                    <button onclick='changeQuantity("${item.id}", 1)'>+</button>
-                    <button onclick='removeFromCart("${item.id}")'>Remove</button>
+                    <button onclick='changeQuantity("${escapeHTML(item.id)}", -1)'>-</button>
+                    <button onclick='changeQuantity("${escapeHTML(item.id)}", 1)'>+</button>
+                    <button onclick='removeFromCart("${escapeHTML(item.id)}")'>Remove</button>
                 </div>
             `;
         }
@@ -415,7 +569,7 @@ function displayCheckoutSummary() {
 
         checkoutItems.innerHTML += `
             <div class="checkout-product">
-                <span>${item.name} × ${item.quantity}</span>
+                <span>${escapeHTML(item.name)} × ${item.quantity}</span>
                 <span>${subtotal} EGP</span>
             </div>
         `;
