@@ -235,17 +235,22 @@
             await OneSignal.Notifications.requestPermission();
 
             if (Notification.permission === "granted") {
+
                 notificationStatus.textContent =
                     "Permission granted. Checking subscription...";
 
                 await OneSignal.User.PushSubscription.optIn();
 
+                await OneSignal.User.addTag("role", "admin");
+
                 notificationStatus.textContent =
-                    "Notification subscription requested successfully.";
+                    "Admin notifications activated successfully.";
 
             } else {
+
                 notificationStatus.textContent =
                     "Notification permission was not granted.";
+
             }
 
         } catch (error) {
