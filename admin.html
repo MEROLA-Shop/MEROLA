@@ -1,6 +1,7 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,23 +9,35 @@
 
     <!-- OneSignal -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+
     <script>
         window.OneSignalDeferred = window.OneSignalDeferred || [];
 
-        OneSignalDeferred.push(async function(OneSignal) {
-            await OneSignal.init({
-                appId: "3ef08bbe-ea30-49a8-bff7-4b0a54e7304a",
-                safari_web_id: "web.onesignal.auto.6187ce57-f346-4a86-93e4-7d70d494c000"
+        window.merolaOneSignalReady = new Promise((resolve, reject) => {
+            window.OneSignalDeferred.push(async function(OneSignal) {
+                try {
+                    await OneSignal.init({
+                        appId: "3ef08bbe-ea30-49a8-bff7-4b0a54e7304a",
+                        safari_web_id: "web.onesignal.auto.6187ce57-f346-4a86-93e4-7d70d494c000"
+                    });
+
+                    resolve(OneSignal);
+
+                } catch (error) {
+                    reject(error);
+                }
             });
         });
     </script>
 
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 <header>
     <h1>MEROLA</h1>
+
     <nav>
         <a href="index.html">Store</a>
         <a href="admin.html">Products</a>
@@ -34,10 +47,13 @@
 
 <main class="admin-container">
 
+    <!-- ADMIN LOGIN -->
     <section id="login-section">
+
         <h2>Admin Login</h2>
 
         <form id="login-form">
+
             <input
                 type="email"
                 id="login-email"
@@ -53,28 +69,45 @@
             >
 
             <button type="submit">LOGIN</button>
+
         </form>
+
     </section>
 
+    <!-- ADMIN DASHBOARD -->
     <section id="dashboard-section" hidden>
 
         <div style="display:flex; justify-content:space-between; align-items:center;">
+
             <h2>Manage Products</h2>
-            <button type="button" id="logout-button">LOG OUT</button>
+
+            <button type="button" id="logout-button">
+                LOG OUT
+            </button>
+
         </div>
 
         <!-- PUSH NOTIFICATIONS -->
-        <section id="notification-section" style="margin:25px 0; padding:20px; border:1px solid #e5cbd2; border-radius:12px;">
+        <section
+            id="notification-section"
+            style="margin:25px 0; padding:20px; border:1px solid #e5cbd2; border-radius:12px;"
+        >
+
             <h2>MEROLA Notifications</h2>
-            <p>Activate notifications to receive new order alerts.</p>
+
+            <p>
+                Activate notifications to receive new order alerts.
+            </p>
 
             <button type="button" id="enable-notifications">
                 ENABLE NOTIFICATIONS
             </button>
 
             <p id="notification-status" aria-live="polite"></p>
+
         </section>
 
+        <!-- PRODUCT FORM -->
         <form id="product-form">
 
             <input type="hidden" id="product-id">
@@ -87,8 +120,10 @@
             >
 
             <select id="product-category" required>
+
                 <option value="hair">Hair Care</option>
                 <option value="skin">Skin Care</option>
+
             </select>
 
             <textarea
@@ -113,10 +148,18 @@
                 step="0.01"
             >
 
-            <input type="date" id="product-offer-date">
+            <input
+                type="date"
+                id="product-offer-date"
+            >
 
+            <!-- PRODUCT IMAGE -->
             <div class="product-image-upload" style="margin:15px 0;">
-                <label for="product-image" style="display:block; margin-bottom:10px;">
+
+                <label
+                    for="product-image"
+                    style="display:block; margin-bottom:10px;"
+                >
                     Product Image
                 </label>
 
@@ -126,18 +169,25 @@
                     accept="image/*"
                 >
 
-                <div id="image-preview-container" hidden style="margin-top:15px;">
+                <div
+                    id="image-preview-container"
+                    hidden
+                    style="margin-top:15px;"
+                >
+
                     <img
                         id="image-preview"
                         src=""
                         alt="Product preview"
                         style="width:180px; height:180px; object-fit:cover; border-radius:10px;"
                     >
+
                 </div>
 
                 <p style="font-size:13px; margin-top:8px;">
                     Choose an image from your device. Maximum size: 5 MB.
                 </p>
+
             </div>
 
             <button type="submit" id="save-product">
@@ -150,41 +200,64 @@
 
         </form>
 
+        <!-- CURRENT PRODUCTS -->
         <h2>Current Products</h2>
+
         <div id="admin-products"></div>
 
     </section>
 
 </main>
 
+<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script src="supabase-config.js"></script>
+
 <script src="admin.js"></script>
 
+<!-- ONESIGNAL SUBSCRIPTION -->
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const button = document.getElementById("enable-notifications");
-        const status = document.getElementById("notification-status");
+    const notificationButton = document.getElementById("enable-notifications");
+    const notificationStatus = document.getElementById("notification-status");
 
-        button.addEventListener("click", async function() {
-            try {
-                button.disabled = true;
-                status.textContent = "Connecting to notifications...";
+    notificationButton.addEventListener("click", async function() {
 
-                await new Promise(resolve => {
-                    window.OneSignalDeferred.push(resolve);
-                });
+        notificationButton.disabled = true;
 
-                await OneSignal.Notifications.requestPermission();
+        notificationStatus.textContent = "Connecting...";
 
-                status.textContent = "Notification permission request completed. Check your browser permission.";
-            } catch (error) {
-                console.error("OneSignal error:", error);
-                status.textContent = "Could not activate notifications. Please try again.";
-            } finally {
-                button.disabled = false;
+        try {
+
+            const OneSignal = await window.merolaOneSignalReady;
+
+            await OneSignal.Notifications.requestPermission();
+
+            if (Notification.permission === "granted") {
+
+                notificationStatus.textContent =
+                    "Notifications permission granted!";
+
+            } else {
+
+                notificationStatus.textContent =
+                    "Notifications permission was not granted.";
+
             }
-        });
+
+        } catch (error) {
+
+            console.error("OneSignal Error:", error);
+
+            notificationStatus.textContent =
+                "Connection failed. Check browser console.";
+
+        } finally {
+
+            notificationButton.disabled = false;
+
+        }
+
     });
 </script>
 
