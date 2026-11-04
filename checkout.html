@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,9 +43,37 @@
                     <input type="tel" id="customer-phone"
                         placeholder="Enter your phone number" required>
 
-                    <label for="customer-city">CITY</label>
-                    <input type="text" id="customer-city"
-                        placeholder="Your city" required>
+                    <label for="customer-city">GOVERNORATE</label>
+                    <select id="customer-city" required>
+                        <option value="">Choose your governorate</option>
+                        <option value="Cairo">Cairo</option>
+                        <option value="Alexandria">Alexandria</option>
+                        <option value="Giza">Giza</option>
+                        <option value="Gharbia">Gharbia</option>
+                        <option value="Sharqia">Sharqia</option>
+                        <option value="Kafr El Sheikh">Kafr El Sheikh</option>
+                        <option value="Dakahlia">Dakahlia</option>
+                        <option value="Beheira">Beheira</option>
+                        <option value="Monufia">Monufia</option>
+                        <option value="Qalyubia">Qalyubia</option>
+                        <option value="Damietta">Damietta</option>
+                        <option value="Port Said">Port Said</option>
+                        <option value="Ismailia">Ismailia</option>
+                        <option value="Suez">Suez</option>
+                        <option value="North Sinai">North Sinai</option>
+                        <option value="South Sinai">South Sinai</option>
+                        <option value="Beni Suef">Beni Suef</option>
+                        <option value="Fayoum">Fayoum</option>
+                        <option value="Minya">Minya</option>
+                        <option value="Assiut">Assiut</option>
+                        <option value="Sohag">Sohag</option>
+                        <option value="Qena">Qena</option>
+                        <option value="Luxor">Luxor</option>
+                        <option value="Aswan">Aswan</option>
+                        <option value="Red Sea">Red Sea</option>
+                        <option value="New Valley">New Valley</option>
+                        <option value="Matrouh">Matrouh</option>
+                    </select>
 
                     <label for="customer-address">FULL ADDRESS</label>
                     <textarea id="customer-address"
@@ -70,6 +98,11 @@
                 </div>
 
                 <div id="checkout-items"></div>
+
+                <div class="summary-shipping">
+                    <span>Shipping</span>
+                    <strong><span id="checkout-shipping">—</span> EGP</strong>
+                </div>
 
                 <div class="summary-total">
                     <span>Grand Total</span>

@@ -3,13 +3,74 @@
 // MEROLA STORE - SUPABASE VERSION
 // =====================================
 
-// Products loaded from Supabase
 let products = [];
 
-// Cart saved locally
 let cart = JSON.parse(
     localStorage.getItem("merolaCartIds") || "[]"
 );
+
+
+// =====================================
+// SHIPPING
+// =====================================
+
+const LOW_SHIPPING_GOVERNORATES = [
+    "Cairo",
+    "Alexandria",
+    "Giza",
+    "Gharbia",
+    "Sharqia",
+    "Kafr El Sheikh"
+];
+
+function getShippingCost(governorate) {
+    if (!governorate) return 0;
+
+    return LOW_SHIPPING_GOVERNORATES.includes(governorate)
+        ? 50
+        : 100;
+}
+
+function getCheckoutProductsTotal() {
+    const savedCart = JSON.parse(
+        localStorage.getItem("merolaCart") || "[]"
+    );
+
+    return savedCart.reduce(
+        (sum, item) =>
+            sum + (Number(item.finalPrice) * Number(item.quantity)),
+        0
+    );
+}
+
+function updateCheckoutTotal() {
+    const cityElement = document.getElementById("customer-city");
+
+    if (!cityElement) return;
+
+    const shipping = getShippingCost(cityElement.value);
+    const productsTotal = getCheckoutProductsTotal();
+    const grandTotal = productsTotal + shipping;
+
+    const shippingElement = document.getElementById("checkout-shipping");
+    const totalElement = document.getElementById("checkout-total");
+
+    if (shippingElement) {
+        shippingElement.textContent = cityElement.value
+            ? shipping
+            : "—";
+    }
+
+    if (totalElement) {
+        totalElement.textContent = grandTotal;
+    }
+}
+
+const citySelect = document.getElementById("customer-city");
+
+if (citySelect) {
+    citySelect.addEventListener("change", updateCheckoutTotal);
+}
 
 
 // =====================================
@@ -224,23 +285,13 @@ function updateCart() {
         if (cartItems) {
             cartItems.innerHTML += `
                 <div class="cart-item">
-
                     <h3>${product.name}</h3>
                     <p>Quantity: ${item.quantity}</p>
                     <p>${subtotal} EGP</p>
 
-                    <button onclick='changeQuantity("${item.id}", -1)'>
-                        -
-                    </button>
-
-                    <button onclick='changeQuantity("${item.id}", 1)'>
-                        +
-                    </button>
-
-                    <button onclick='removeFromCart("${item.id}")'>
-                        Remove
-                    </button>
-
+                    <button onclick='changeQuantity("${item.id}", -1)'>-</button>
+                    <button onclick='changeQuantity("${item.id}", 1)'>+</button>
+                    <button onclick='removeFromCart("${item.id}")'>Remove</button>
                 </div>
             `;
         }
@@ -357,14 +408,10 @@ function displayCheckoutSummary() {
         localStorage.getItem("merolaCart") || "[]"
     );
 
-    let total = 0;
-
     checkoutItems.innerHTML = "";
 
     savedCart.forEach(item => {
         const subtotal = item.finalPrice * item.quantity;
-
-        total += subtotal;
 
         checkoutItems.innerHTML += `
             <div class="checkout-product">
@@ -374,11 +421,7 @@ function displayCheckoutSummary() {
         `;
     });
 
-    const totalElement = document.getElementById("checkout-total");
-
-    if (totalElement) {
-        totalElement.textContent = total;
-    }
+    updateCheckoutTotal();
 }
 
 
@@ -401,12 +444,27 @@ if (checkoutForm) {
             return;
         }
 
+        const governorate = document.getElementById("customer-city").value;
+
+        if (!governorate) {
+            alert("Please choose your governorate.");
+            return;
+        }
+
+        const productsTotal = savedCart.reduce(
+            (sum, item) =>
+                sum + (Number(item.finalPrice) * Number(item.quantity)),
+            0
+        );
+
+        const shippingCost = getShippingCost(governorate);
+
         const order = {
             customer_name: document.getElementById("customer-name").value.trim(),
 
             phone: document.getElementById("customer-phone").value.trim(),
 
-            city: document.getElementById("customer-city").value.trim(),
+            city: governorate,
 
             address: document.getElementById("customer-address").value.trim(),
 
@@ -414,11 +472,9 @@ if (checkoutForm) {
 
             products: savedCart,
 
-            total: savedCart.reduce(
-                (sum, item) =>
-                    sum + (Number(item.finalPrice) * Number(item.quantity)),
-                0
-            ),
+            shipping_cost: shippingCost,
+
+            total: productsTotal + shippingCost,
 
             status: "Pending"
         };
@@ -458,7 +514,7 @@ if (checkoutForm) {
 
         } finally {
             submitButton.disabled = false;
-            submitButton.textContent = "CONFIRM ORDER";
+            submitButton.textContent = "PLACE MY ORDER";
         }
     });
 }
