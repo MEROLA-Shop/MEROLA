@@ -5,6 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MEROLA - Admin Dashboard</title>
+
+    <!-- OneSignal -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+
+        OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+                appId: "3ef08bbe-ea30-49a8-bff7-4b0a54e7304a",
+                safari_web_id: "web.onesignal.auto.6187ce57-f346-4a86-93e4-7d70d494c000"
+            });
+        });
+    </script>
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -48,6 +62,18 @@
             <h2>Manage Products</h2>
             <button type="button" id="logout-button">LOG OUT</button>
         </div>
+
+        <!-- PUSH NOTIFICATIONS -->
+        <section id="notification-section" style="margin:25px 0; padding:20px; border:1px solid #e5cbd2; border-radius:12px;">
+            <h2>MEROLA Notifications</h2>
+            <p>Activate notifications to receive new order alerts.</p>
+
+            <button type="button" id="enable-notifications">
+                ENABLE NOTIFICATIONS
+            </button>
+
+            <p id="notification-status" aria-live="polite"></p>
+        </section>
 
         <form id="product-form">
 
@@ -134,6 +160,33 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="admin.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const button = document.getElementById("enable-notifications");
+        const status = document.getElementById("notification-status");
+
+        button.addEventListener("click", async function() {
+            try {
+                button.disabled = true;
+                status.textContent = "Connecting to notifications...";
+
+                await new Promise(resolve => {
+                    window.OneSignalDeferred.push(resolve);
+                });
+
+                await OneSignal.Notifications.requestPermission();
+
+                status.textContent = "Notification permission request completed. Check your browser permission.";
+            } catch (error) {
+                console.error("OneSignal error:", error);
+                status.textContent = "Could not activate notifications. Please try again.";
+            } finally {
+                button.disabled = false;
+            }
+        });
+    });
+</script>
 
 </body>
 </html>
