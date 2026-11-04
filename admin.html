@@ -18,12 +18,17 @@
                 try {
                     await OneSignal.init({
                         appId: "3ef08bbe-ea30-49a8-bff7-4b0a54e7304a",
-                        safari_web_id: "web.onesignal.auto.6187ce57-f346-4a86-93e4-7d70d494c000"
+                        safari_web_id: "web.onesignal.auto.6187ce57-f346-4a86-93e4-7d70d494c000",
+                        serviceWorkerPath: "/MEROLA/OneSignalSDKWorker.js",
+                        serviceWorkerParam: {
+                            scope: "/MEROLA/"
+                        }
                     });
 
                     resolve(OneSignal);
 
                 } catch (error) {
+                    console.error("OneSignal initialization failed:", error);
                     reject(error);
                 }
             });
@@ -58,6 +63,7 @@
                 type="email"
                 id="login-email"
                 placeholder="Admin Email"
+                autocomplete="username"
                 required
             >
 
@@ -65,6 +71,7 @@
                 type="password"
                 id="login-password"
                 placeholder="Password"
+                autocomplete="current-password"
                 required
             >
 
@@ -120,10 +127,8 @@
             >
 
             <select id="product-category" required>
-
                 <option value="hair">Hair Care</option>
                 <option value="skin">Skin Care</option>
-
             </select>
 
             <textarea
@@ -148,10 +153,7 @@
                 step="0.01"
             >
 
-            <input
-                type="date"
-                id="product-offer-date"
-            >
+            <input type="date" id="product-offer-date">
 
             <!-- PRODUCT IMAGE -->
             <div class="product-image-upload" style="margin:15px 0;">
@@ -224,8 +226,7 @@
     notificationButton.addEventListener("click", async function() {
 
         notificationButton.disabled = true;
-
-        notificationStatus.textContent = "Connecting...";
+        notificationStatus.textContent = "Connecting to notifications...";
 
         try {
 
@@ -234,15 +235,17 @@
             await OneSignal.Notifications.requestPermission();
 
             if (Notification.permission === "granted") {
+                notificationStatus.textContent =
+                    "Permission granted. Checking subscription...";
+
+                await OneSignal.User.PushSubscription.optIn();
 
                 notificationStatus.textContent =
-                    "Notifications permission granted!";
+                    "Notification subscription requested successfully.";
 
             } else {
-
                 notificationStatus.textContent =
-                    "Notifications permission was not granted.";
-
+                    "Notification permission was not granted.";
             }
 
         } catch (error) {
