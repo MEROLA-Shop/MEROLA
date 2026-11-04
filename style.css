@@ -1,4 +1,3 @@
-
 /* =====================================
    MEROLA STORE - MAIN STYLES
 ===================================== */
@@ -731,12 +730,16 @@ nav a:hover {
     color: #b5a5a9;
 }
 
+/* CHECKOUT INPUTS + GOVERNORATE SELECT */
+
 #checkout-form input,
-#checkout-form textarea {
+#checkout-form textarea,
+#checkout-form select {
     display: block;
     width: 100%;
     box-sizing: border-box;
-    padding: 15px;
+    height: 48px;
+    padding: 0 15px;
     margin-bottom: 22px;
     border: 1px solid #eee4e3;
     background: #fdfaf9;
@@ -745,16 +748,30 @@ nav a:hover {
     font-size: 13px;
     outline: none;
     border-radius: 2px;
+    transition: 0.3s ease;
 }
 
 #checkout-form input:focus,
-#checkout-form textarea:focus {
+#checkout-form textarea:focus,
+#checkout-form select:focus {
     border-color: #a65d70;
     background: #fff;
 }
 
+#checkout-form select {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 40px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a65d70' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+}
+
 #checkout-form textarea {
     min-height: 85px;
+    height: auto;
+    padding: 15px;
     resize: vertical;
 }
 
