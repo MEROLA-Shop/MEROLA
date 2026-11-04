@@ -16,18 +16,27 @@ let previewObjectUrl = null;
 
 // Check whether a user is an admin
 async function isAdmin(userId) {
+    console.log("Checking admin access for UID:", userId);
+
     const { data, error } = await supabaseClient
         .from("admin_users")
         .select("user_id")
-        .eq("user_id", userId)
-        .maybeSingle();
+        .eq("user_id", userId);
+
+    console.log("Admin query result:", data);
+    console.log("Admin query error:", error);
 
     if (error) {
-        console.error("Admin check error:", error);
+        console.error("Admin check failed:", error);
+        alert("Admin check failed: " + error.message);
         return false;
     }
 
-    return !!data;
+    const authorized = Array.isArray(data) && data.length > 0;
+
+    console.log("Admin authorized:", authorized);
+
+    return authorized;
 }
 
 // Image preview
@@ -78,12 +87,14 @@ async function checkLogin() {
     const { data, error } = await supabaseClient.auth.getSession();
 
     if (error) {
-        alert(error.message);
+        alert("Session error: " + error.message);
         showLogin();
         return;
     }
 
     const user = data.session?.user;
+
+    console.log("Current session UID:", user?.id || "No active session");
 
     if (user && await isAdmin(user.id)) {
         showDashboard();
@@ -111,34 +122,63 @@ function showDashboard() {
 loginForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
-    const email = document.getElementById("login-email").value;
+    const email = document.getElementById("login-email").value.trim();
     const password = document.getElementById("login-password").value;
 
-    const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email,
-        password
-    });
+    const loginButton = loginForm.querySelector('button[type="submit"]');
 
-    if (error) {
-        alert("Login failed: " + error.message);
-        return;
+    if (loginButton) {
+        loginButton.disabled = true;
     }
 
-    const authorized = await isAdmin(data.user.id);
+    try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email,
+            password
+        });
 
-    if (!authorized) {
-        await supabaseClient.auth.signOut();
-        alert("You are not authorized to access this dashboard.");
-        return;
+        if (error) {
+            alert("Login failed: " + error.message);
+            return;
+        }
+
+        console.log("Successfully logged in UID:", data.user.id);
+
+        const authorized = await isAdmin(data.user.id);
+
+        if (!authorized) {
+            await supabaseClient.auth.signOut();
+
+            alert(
+                "You are not authorized to access this dashboard.\n" +
+                "Check the browser Console for the admin query result."
+            );
+
+            return;
+        }
+
+        loginForm.reset();
+        showDashboard();
+
+    } catch (error) {
+        console.error("Login error:", error);
+        alert("Login error: " + error.message);
+
+    } finally {
+        if (loginButton) {
+            loginButton.disabled = false;
+        }
     }
-
-    loginForm.reset();
-    showDashboard();
 });
 
 // Logout
 document.getElementById("logout-button").addEventListener("click", async function () {
-    await supabaseClient.auth.signOut();
+    const { error } = await supabaseClient.auth.signOut();
+
+    if (error) {
+        alert("Logout failed: " + error.message);
+        return;
+    }
 
     products = [];
     productsContainer.innerHTML = "";
@@ -157,6 +197,7 @@ async function loadProducts() {
 
     if (error) {
         productsContainer.textContent = "Error: " + error.message;
+        console.error("Load products error:", error);
         return;
     }
 
